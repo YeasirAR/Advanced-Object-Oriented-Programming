@@ -1,0 +1,277 @@
+package Lab8;
+
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.Scanner;
+
+public class Test {
+    public static void main(String[] args) {
+        try{
+            Scanner sc = new Scanner(new File("Files/data.txt"));
+            ArrayList<BankAccount> accounts = new ArrayList<>();
+
+            while (sc.hasNext()){
+                BankAccount ac = new BankAccount(sc.next(),
+                        sc.nextInt(),
+                        sc.nextDouble());
+
+                accounts.add(ac);
+            }
+
+            // Descending sort, balance
+            accounts.sort(new Comparator<BankAccount>() {
+                @Override
+                public int compare(BankAccount o1, BankAccount o2) {
+                    // for negative return, o1 goes before o2
+                    // for positive return, o2 goes before o1
+                    if(o1.balance > o2.balance) return -1;
+                    return 1;
+                }
+            });
+
+            PrintWriter out = new PrintWriter("Files/result.txt");
+
+            for(BankAccount ac: accounts){
+                out.println(ac.name + " " + ac.id + " " + ac.balance);
+            }
+            out.close();
+            sc.close();
+        }
+        catch (IOException e){
+            e.printStackTrace();
+        }
+    }
+}
+
+
+class BankAccount{
+    String name;
+    int id;
+    double balance;
+
+    public BankAccount(String name, int id, double balance) {
+        this.name = name;
+        this.id = id;
+        this.balance = balance;
+    }
+}
+
+
+
+
+
+
+package Lab8;
+
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.Random;
+
+public class GenerateRandomValues {
+    public static void main(String[] args) {
+        Random random = new Random();
+
+        try{
+            PrintWriter out = new PrintWriter("Files/data.txt");
+
+            for(int i = 0; i < 500000; i++){
+                out.println(random.nextInt(100000));
+            }
+
+            out.close();
+        }
+        catch (IOException e){
+            e.printStackTrace();
+        }
+    }
+}
+
+
+
+
+
+
+
+
+
+// HashSet
+
+package Lab8;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.HashSet;
+import java.util.Scanner;
+
+public class Test {
+    public static void main(String[] args) {
+        try{
+            Scanner sc = new Scanner(new File("Files/data.txt"));
+            int numCheck = 10051;
+
+            HashSet<Integer> numbers = new HashSet<>();
+
+            while(sc.hasNext()){
+                int r = sc.nextInt();
+                numbers.add(r);
+            }
+
+            if(numbers.contains(numCheck)){
+                System.out.println("Found!");
+            }
+            else System.out.println("Not Found!");
+
+            sc.close();
+        }
+        catch (IOException e){
+            e.printStackTrace();
+        }
+    }
+}
+
+
+
+
+// HashMap
+
+package Lab8;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Scanner;
+
+public class Test {
+    public static void main(String[] args) {
+        try{
+            Scanner sc = new Scanner(new File("Files/data.txt"));
+            HashMap<String, Integer> map = new HashMap<>();
+
+            while(sc.hasNext()){
+                String st = sc.next();
+                if(map.containsKey(st)){
+                    int v = map.get(st);
+                    map.put(st, v + 1);
+                }
+                else{
+                    map.put(st, 1);
+                }
+            }
+
+            for(int i = 0; i < 100000; i++){
+                if(map.containsKey(i + ""))
+                    System.out.println(i + " " + map.get(i + ""));
+                else
+                    System.out.println(i + " 0");
+            }
+
+            sc.close();
+        }
+        catch (IOException e){
+            e.printStackTrace();
+        }
+    }
+}
+
+
+
+
+
+
+
+
+
+
+// Object read and write in java
+
+package Lab8;
+
+import java.io.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Scanner;
+
+public class Test {
+    public static void main(String[] args) {
+        BankAccount b1 = new BankAccount("Arif", 1010101, 5222.5);
+        BankAccount b2 = new BankAccount("Asif", 1013231, 5212.5);
+        BankAccount b3 = new BankAccount("Hasan", 10123101, 5322.5);
+
+// Read write ArrayList
+
+//        ArrayList<BankAccount> accounts = new ArrayList<>();
+//
+//        accounts.add(b1);
+//        accounts.add(b2);
+//        accounts.add(b3);
+
+//        try {
+//            FileOutputStream f = new FileOutputStream("Files/objectdata.txt");
+//            ObjectOutputStream ow = new ObjectOutputStream(f);
+//
+//            ow.writeObject(accounts);
+//
+//            ow.close();
+//        }
+//        catch (IOException e){
+//            e.printStackTrace();
+//        }
+
+        try {
+            FileInputStream f = new FileInputStream("Files/objectdata.txt");
+            ObjectInputStream ow = new ObjectInputStream(f);
+
+            ArrayList<BankAccount> ac = (ArrayList<BankAccount>)ow.readObject();
+
+            System.out.println(ac.get(2).name + " " + ac.get(2).id);
+
+            ow.close();
+        }
+
+
+// Read write single object
+
+//        try {
+//            FileOutputStream f = new FileOutputStream("Files/objectdata.txt");
+//            ObjectOutputStream ow = new ObjectOutputStream(f);
+//
+//            ow.writeObject(bankAccount);
+//
+//            ow.close();
+//        }
+//        catch (IOException e){
+//            e.printStackTrace();
+//        }
+
+//        try {
+//            FileInputStream f = new FileInputStream("Files/objectdata.txt");
+//            ObjectInputStream ow = new ObjectInputStream(f);
+//
+//            BankAccount b = (BankAccount)ow.readObject();
+//
+//            System.out.println(b.name + " " + b.id);
+//
+//            ow.close();
+//        }
+        catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+}
+
+
+class BankAccount implements Serializable {
+    String name;
+    int id;
+    double balance;
+
+    public BankAccount(String name, int id, double balance) {
+        this.name = name;
+        this.id = id;
+        this.balance = balance;
+    }
+}

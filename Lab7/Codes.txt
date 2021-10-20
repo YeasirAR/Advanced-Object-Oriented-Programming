@@ -1,0 +1,214 @@
+Client Controller.java
+
+package sample;
+
+import javafx.fxml.FXML;
+import javafx.scene.control.Button;
+import javafx.scene.control.TextArea;
+import javafx.scene.control.TextField;
+
+import java.io.*;
+import java.net.Socket;
+import java.net.SocketException;
+
+public class Controller {
+    @FXML
+    Button button;
+
+    @FXML
+    TextArea showArea;
+
+    @FXML
+    TextField inputField;
+
+    boolean isConnected = false;
+
+    BufferedReader reader;
+    BufferedWriter writer;
+
+    public Controller(){
+
+    }
+
+    @FXML
+    void buttonPressed(){
+        if(!isConnected) {
+            // Client is not connected with the server, lets connect with server
+            String inputName = inputField.getText();
+            inputField.clear();
+
+            if(inputName == null || inputName.length() == 0){
+                showArea.appendText("Enter a valid name!\n");
+                return;
+            }
+            try {
+                Socket sc = new Socket("localhost", 6601);
+
+                OutputStreamWriter o = new OutputStreamWriter(sc.getOutputStream());
+                writer = new BufferedWriter(o);
+
+                writer.write(inputName+"\n");
+                writer.flush();
+
+                InputStreamReader isr = new InputStreamReader(sc.getInputStream());
+                reader = new BufferedReader(isr);
+
+                //Anonymous inner class
+                Thread serverListener = new Thread(){
+                    @Override
+                    public void run() {
+                        while(true){
+                            try {
+                                String data = reader.readLine() + "\n";
+                                showArea.appendText(data);
+                            }
+                            catch (SocketException e){
+                                showArea.appendText("Connection lost!\n");
+                                break;
+                            }
+                            catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }
+                };
+                serverListener.start();
+
+                showArea.appendText("Connection established!\n");
+                button.setText("Send");
+                inputField.setPromptText("Write your message.");
+                isConnected = true;
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        else{
+            try {
+                String msg = inputField.getText();
+                inputField.clear();
+
+                if (msg == null || msg.length() == 0) {
+                    return;
+                }
+
+                writer.write(msg + "\n");
+                writer.flush();
+            }
+            catch (IOException e){
+                e.printStackTrace();
+            }
+        }
+    }
+}
+
+
+
+Client FXML
+
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.text.Font?>
+
+
+<Pane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="447.0" prefWidth="604.0" xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sample.Controller">
+   <children>
+      <TextArea fx:id="showArea" editable="false" layoutX="57.0" layoutY="57.0" prefHeight="272.0" prefWidth="487.0">
+         <font>
+            <Font size="18.0" />
+         </font>
+      </TextArea>
+      <TextField fx:id="inputField" layoutX="57.0" layoutY="360.0" prefHeight="41.0" prefWidth="392.0" promptText="Enter your name">
+         <font>
+            <Font size="18.0" />
+         </font>
+      </TextField>
+      <Button fx:id="button" layoutX="471.0" layoutY="359.0" mnemonicParsing="false" onAction="#buttonPressed" prefHeight="41.0" prefWidth="73.0" text="Connect" />
+   </children>
+</Pane>
+
+ 
+Server Main
+
+import java.io.*;
+import java.net.ServerSocket;
+import java.net.Socket; 
+
+public class MyServer {
+    public static void main(String[] args) {
+        try {
+            System.out.println("Server is waiting for client.");
+            ServerSocket serverSocket = new ServerSocket(6601);
+
+            while (true){
+                Socket sc = serverSocket.accept();
+                Client client = new Client(sc);
+                Thread t = new Thread(client);
+                t.start();
+            }
+        }
+        catch (IOException e){
+            e.printStackTrace();
+        }
+    }
+}
+ 
+Server Client.java
+import java.io.*;
+import java.net.Socket;
+import java.net.SocketException;
+import java.util.ArrayList;
+
+public class Client implements Runnable{
+    String clientName;
+    BufferedReader reader;
+    BufferedWriter writer;
+
+    final static ArrayList<Client> clients = new ArrayList<>();
+
+    Client(Socket sc){
+        try {
+            OutputStreamWriter o = new OutputStreamWriter(sc.getOutputStream());
+            writer = new BufferedWriter(o);
+
+            InputStreamReader isr = new InputStreamReader(sc.getInputStream());
+            reader = new BufferedReader(isr);
+
+            clientName = reader.readLine();
+            clients.add(this);
+
+            System.out.println("Client " + clientName + " connected.");
+        }
+        catch (IOException e){
+            e.printStackTrace();
+        }
+    }
+
+
+    @Override
+    public void run() {
+        while(true){
+            try {
+                String data = reader.readLine();
+                data = clientName + ": " + data + "\n";
+                synchronized (clients){
+                    for(Client client: clients){
+                        client.writer.write(data);
+                        client.writer.flush();
+                    }
+                }
+            }
+            catch (SocketException e){
+                break;
+            }
+            catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+}
+
