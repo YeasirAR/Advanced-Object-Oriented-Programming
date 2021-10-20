@@ -43,3 +43,5 @@ This repository contains the course materials of AOOP including the quiz questio
 ### Lab12
   Final Project Submission and </br>
   Presentation</br>
+  </br>
+### [Recordings](https://drive.google.com/drive/folders/1lxgkeEJV__L-CekwHlpvXpHe9lqjz6vp "Recordings")
