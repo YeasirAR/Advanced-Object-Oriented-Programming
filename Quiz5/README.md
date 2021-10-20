@@ -23,5 +23,4 @@ Example:
 sum(1.5, 3.5);     // prints: 5
 sum(100, 200);     // prints: 300
 ```
-Submission instruction: Submit your code in the text editor below. Code must be indented. All the codes will be cross-checked for plagiarism and if found, both submissions will receive 0.  
 
