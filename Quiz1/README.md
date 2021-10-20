@@ -15,9 +15,9 @@ What is the x position of the textField object?
 ### Question 2
 Which of the following statements are true about "Thread.sleep(5);" 
 
-**a. When used in animation, If the value 5 inside the sleep method is replaced with 50,  the animation will become slower.**
+##### a. When used in animation, If the value 5 inside the sleep method is replaced with 50,  the animation will become slower.
 
-**b. The execution of the program will be halted for 5 millisecond. **
+##### b. The execution of the program will be halted for 5 millisecond. 
 
 c. The execution of the program will be halted for 5 second. 
 
